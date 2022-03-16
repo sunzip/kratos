@@ -65,27 +65,39 @@ func run(cmd *cobra.Command, args []string) {
 					})
 				}
 			}
+			cs.SourceProto = args[0]
+
+			cs.ServiceLower = strings.ToLower(cs.Service)
+			cs.ToolName = "createService"
 			res = append(res, cs)
 		}),
 	)
+	checkServiceDir(targetDir)
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		fmt.Printf("Target directory: %s does not exsit\n", targetDir)
+		fmt.Printf("Target directory: %s does not exsits\n", targetDir)
 		return
 	}
 	for _, s := range res {
-		to := path.Join(targetDir, strings.ToLower(s.Service)+".go")
-		if _, err := os.Stat(to); !os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.Service, to)
-			continue
+		{
+			// data.go文件增加Data类字段,Data类方法,NewData函数增加代码
+
+			dataPath := changeDir(targetDir, "\\module\\", "\\data")
+			sf := parseFile(dataPath, "data.go")
+			incrementMethodData(dataPath, "data.go", sf, s)
+			return
 		}
-		b, err := s.execute()
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := os.WriteFile(to, b, 0o644); err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(to)
+
+		s.ModulePackage = changeDir(s.Package, "/api/", "/internal/module")
+		s.DomainPackage = changeDir(s.Package, "/api/", "/internal/domain")
+		s.InternalPackage = changeDir(s.Package, "/api/", "/internal")
+
+		GenerateFile(targetDir, s, AppLayer)
+		GenerateFile(targetDir, s, ServiceLayer)
+		GenerateFile(targetDir, s, RepoLayer)
+		GenerateFile(targetDir, s, ProviderSetLayer)
+
+		domainDir := changeDir(targetDir, "\\module\\", "")
+		GenerateFile(domainDir, s, DomainLayer)
 	}
 }
 
@@ -100,4 +112,66 @@ func getMethodType(streamsRequest, streamsReturns bool) MethodType {
 		return returnsStreamsType
 	}
 	return unaryType
+}
+func checkServiceDir(targetDir string) {
+	// targetDir 为服务的根目录,
+	checkDir(targetDir)
+	checkDir(targetDir + "/service")
+	checkDir(targetDir + "/app")
+	checkDir(targetDir + "/repo")
+}
+
+// 不存在就创建
+func checkDir(dir string) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		//
+		os.Mkdir(dir, os.ModePerm)
+	}
+}
+
+type FileLayer uint8
+
+const (
+	AppLayer FileLayer = iota
+	ServiceLayer
+	RepoLayer
+	ProviderSetLayer
+	DomainLayer
+)
+
+// 比如app, prefix=_ ,则返回_app
+//  返回后缀 xxx_app.go
+//  返回层名称, 和前后缀
+func (t FileLayer) GetLayerStr(prefix, suffix string) (ret string) {
+	switch t {
+	case AppLayer:
+		ret = prefix + "app" + suffix
+	case ServiceLayer:
+		ret = prefix + "service" + suffix
+	case RepoLayer:
+		ret = prefix + "repo" + suffix
+	case ProviderSetLayer:
+		ret = ""
+	case DomainLayer:
+		ret = prefix + "domain" + suffix
+	}
+	return
+}
+
+func GenerateFile(targetDir string, s *Service, layer FileLayer) {
+
+	to := path.Join(targetDir, layer.GetLayerStr("", ""), strings.ToLower(s.ServiceName(layer))+".go")
+
+	if _, err := os.Stat(to); !os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "%s already exists: %s\n", s.ServiceName(layer), to)
+		return
+	}
+	b, err := s.Execute(layer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile(to, b, 0o644); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(to)
 }

@@ -21,14 +21,21 @@ import (
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
+	"{{ .DomainPackage }}"
+	"github.com/go-kratos/kratos/v2/log"
 )
 
 type {{ .Service }}Service struct {
-	pb.Unimplemented{{ .Service }}Server
+	// pb.Unimplemented{{ .Service }}Server
+	logger *log.Helper
+	repo    domain.I{{ .Service }}Repo
 }
 
-func New{{ .Service }}Service() *{{ .Service }}Service {
-	return &{{ .Service }}Service{}
+func New{{ .Service }}Service(logger log.Logger, repo domain.I{{ .Service }}Repo) domain.I{{ .Service }}Service {
+	return &{{ .Service }}Service{
+		logger:  log.NewHelper(logger),
+		repo:    repo,
+	}
 }
 
 {{- $s1 := "google.protobuf.Empty" }}
@@ -36,7 +43,8 @@ func New{{ .Service }}Service() *{{ .Service }}Service {
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
 {{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
+	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.repo.{{ .Name }}(ctx,req){{ end }}
+	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
 }
 
 {{- else if eq .Type 2 }}
@@ -94,15 +102,34 @@ const (
 	returnsStreamsType MethodType = 4
 )
 
+type IService interface {
+	Execute() ([]byte, error)
+	ServiceName() string
+}
+
 // Service is a proto service.
 type Service struct {
-	Package     string
-	Service     string
-	Methods     []*Method
-	GoogleEmpty bool
+	// import pb 完整package
+	Package string
+	// 引用module/app等的包名
+	ModulePackage string
+	// 引用 domain 包
+	DomainPackage string
+	// 引用 internal 包, 可以灵活引用internal下面的包
+	InternalPackage string
+	// 服务名称 OpLog
+	Service string
+	// 服务名称 小写, 用作包名
+	ServiceLower string
+	Methods      []*Method
+	GoogleEmpty  bool
 
 	UseIO      bool
 	UseContext bool
+	// proto 源文件
+	SourceProto string
+	// 生成工具名称
+	ToolName string
 }
 
 // Method is a proto method.
@@ -116,6 +143,29 @@ type Method struct {
 	Type MethodType
 }
 
+// 根据servicename 获取go文件名称
+func (s *Service) ServiceName(layer FileLayer) string {
+	if layer == ProviderSetLayer {
+		return "provider_set"
+	} else {
+		return s.Service + layer.GetLayerStr("_", "")
+	}
+}
+func (s *Service) Execute(layer FileLayer) ([]byte, error) {
+	switch layer {
+	case AppLayer:
+		return s.executeApp()
+	case ServiceLayer:
+		return s.execute()
+	case RepoLayer:
+		return s.executeRepo()
+	case ProviderSetLayer:
+		return s.executeProviderSet()
+	case DomainLayer:
+		return s.executeDomain()
+	}
+	return s.execute()
+}
 func (s *Service) execute() ([]byte, error) {
 	const empty = "google.protobuf.Empty"
 	buf := new(bytes.Buffer)
