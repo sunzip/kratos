@@ -17,7 +17,7 @@ import (
 	"io"
 	{{- end }}
 
-	pb "{{ .Package }}"
+	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
@@ -40,13 +40,13 @@ func New{{ .Service }}Repo(data *data.Data) domain.I{{ .Service }}Repo {
 {{ range .Methods }}
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
+{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Reply }}{{ end }}, error) {
 	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.data.{{ .Service }}Grpc().{{ .Name }}(ctx,req){{ end }}
-	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
+	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}{{ end }}, nil
 }
 
 {{- else if eq .Type 2 }}
-func (s *{{ .Service }}Repo) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error {
+func (s *{{ .Service }}Repo) {{ .Name }}(conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
 		req, err := conn.Recv()
 		if err == io.EOF {
@@ -56,7 +56,7 @@ func (s *{{ .Service }}Repo) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Serve
 			return err
 		}
 		
-		err = conn.Send(&pb.{{ .Reply }}{})
+		err = conn.Send(&{{ .GrpcPbName }}.{{ .Reply }}{})
 		if err != nil {
 			return err
 		}
@@ -64,11 +64,11 @@ func (s *{{ .Service }}Repo) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Serve
 }
 
 {{- else if eq .Type 3 }}
-func (s *{{ .Service }}Repo) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error {
+func (s *{{ .Service }}Repo) {{ .Name }}(conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
 		req, err := conn.Recv()
 		if err == io.EOF {
-			return conn.SendAndClose(&pb.{{ .Reply }}{})
+			return conn.SendAndClose(&{{ .GrpcPbName }}.{{ .Reply }}{})
 		}
 		if err != nil {
 			return err
@@ -78,9 +78,9 @@ func (s *{{ .Service }}Repo) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Serve
 
 {{- else if eq .Type 4 }}
 func (s *{{ .Service }}Repo) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error {
+{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}, conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
-		err := conn.Send(&pb.{{ .Reply }}{})
+		err := conn.Send(&{{ .GrpcPbName }}.{{ .Reply }}{})
 		if err != nil {
 			return err
 		}

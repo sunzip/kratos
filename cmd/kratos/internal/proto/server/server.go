@@ -11,6 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// pb的别名
+	HttpPbName = "pb"
+	// pb的别名
+	GrpcPbName = "infoPb"
+)
+
 // CmdServer the service command.
 var CmdServer = &cobra.Command{
 	Use:   "server",
@@ -60,15 +67,21 @@ func run(cmd *cobra.Command, args []string) {
 				r, ok := e.(*proto.RPC)
 				if ok {
 					cs.Methods = append(cs.Methods, &Method{
-						Service: s.Name, Name: r.Name, Request: r.RequestType,
+						GrpcPbName: GrpcPbName,
+						HttpPbName: HttpPbName,
+						Service:    s.Name, Name: r.Name, Request: r.RequestType,
 						Reply: r.ReturnsType, Type: getMethodType(r.StreamsRequest, r.StreamsReturns),
 					})
 				}
 			}
 			cs.SourceProto = args[0]
 
-			cs.ServiceLower = strings.ToLower(cs.Service)
+			pathParts := strings.Split(targetDir, "/")
+			cs.ServiceLower = pathParts[len(pathParts)-1] //strings.ToLower(cs.Service)
 			cs.ToolName = "createService"
+			cs.HttpPbName = HttpPbName
+			cs.GrpcPbName = GrpcPbName
+			cs.GrpcPackage = changeDir(cs.Package, "/drone-appservice/", "/common/api/drone/info/v1")
 			res = append(res, cs)
 		}),
 	)
@@ -81,10 +94,20 @@ func run(cmd *cobra.Command, args []string) {
 		{
 			// data.go文件增加Data类字段,Data类方法,NewData函数增加代码
 
-			dataPath := changeDir(targetDir, "\\module\\", "\\data")
-			sf := parseFile(dataPath, "data.go")
+			// ok
+			dataPath := changeDir(targetDir, "/module/", "/data")
+			sf := parseFile(dataPath, "data.go", s)
 			incrementMethodData(dataPath, "data.go", sf, s)
-			return
+
+			// ok
+			protocolPath := changeDir(targetDir, "/module/", "/protocol")
+			sfReg := parseFile(protocolPath, "register.go", s)
+			incrementRegister(protocolPath, "register.go", sfReg, s)
+
+			cmdServerPath := changeDir(targetDir, "/internal/", "/cmd/server")
+			sfCmdServer := parseFile(cmdServerPath, "wire.go", s)
+			incrementCmdServer(cmdServerPath, "wire.go", sfCmdServer, s)
+			// return
 		}
 
 		s.ModulePackage = changeDir(s.Package, "/api/", "/internal/module")
@@ -96,7 +119,7 @@ func run(cmd *cobra.Command, args []string) {
 		GenerateFile(targetDir, s, RepoLayer)
 		GenerateFile(targetDir, s, ProviderSetLayer)
 
-		domainDir := changeDir(targetDir, "\\module\\", "")
+		domainDir := changeDir(targetDir, "/module/", "")
 		GenerateFile(domainDir, s, DomainLayer)
 	}
 }

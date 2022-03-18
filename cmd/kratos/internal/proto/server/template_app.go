@@ -17,7 +17,7 @@ import (
 	"io"
 	{{- end }}
 
-	pb "{{ .Package }}"
+	{{ .HttpPbName }} "{{ .Package }}"
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}

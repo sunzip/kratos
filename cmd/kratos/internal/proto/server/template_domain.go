@@ -21,7 +21,8 @@ import (
 	{{- if .UseIO }}
 	"io"
 	{{- end }}
-	pb "{{ .Package }}"
+	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
+	{{ .HttpPbName }} "{{ .Package }}"
 )
 
 // 参数和类型可改
@@ -31,17 +32,17 @@ type I{{ .Service }}Repo interface {
 	{{ range .Methods }}
 	{{- if eq .Type 1 }}
 	{{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) 
+	{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Reply }}{{ end }}, error) 
 
 	{{- else if eq .Type 2 }}
-	{{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error 
+	{{ .Name }}(conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error 
 
 	{{- else if eq .Type 3 }}
-	{{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error
+	{{ .Name }}(conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- else if eq .Type 4 }}
 	{{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error
+	{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}, conn {{ .GrpcPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- end }}
 	{{- end }}
@@ -54,17 +55,17 @@ type I{{ .Service }}Service interface {
 	{{ range .Methods }}
 	{{- if eq .Type 1 }}
 	{{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) 
+	{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) 
 
 	{{- else if eq .Type 2 }}
-	{{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error 
+	{{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error 
 
 	{{- else if eq .Type 3 }}
-	{{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error
+	{{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- else if eq .Type 4 }}
 	{{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error
+	{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}, conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- end }}
 	{{- end }}

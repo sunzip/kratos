@@ -17,11 +17,14 @@ import (
 	"io"
 	{{- end }}
 
-	pb "{{ .Package }}"
+	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
+	"git.hiscene.net/hi_uav/uav-command-server/common/tools"
+	{{ .HttpPbName }} "{{ .Package }}"
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
 	"{{ .DomainPackage }}"
+	"git.hiscene.net/hifoundry/go-kit/util/hiKratos"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
@@ -42,13 +45,28 @@ func New{{ .Service }}Service(logger log.Logger, repo domain.I{{ .Service }}Repo
 {{ range .Methods }}
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*pb.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*pb.{{ .Reply }}{{ end }}, error) {
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.repo.{{ .Name }}(ctx,req){{ end }}
-	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&pb.{{ .Reply }}{}{{ end }}, nil
+{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) {
+	{{ if eq .Reply $s1 }}return &emptypb.Empty{}{{ else }}
+	reqData := &{{ .GrpcPbName }}.{{ .Request }}{}
+	err := tools.StructConvert(reqData, req)
+	if err != nil {
+		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInvalidParameter)
+	}
+	repData, err := s.repo.{{ .Name }}(ctx,reqData)
+	if err != nil {
+		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
+	}
+	rep := &{{ .HttpPbName }}.{{ .Reply }}{}
+	err = tools.StructConvert(rep, repData)
+	if err != nil {
+		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
+	}
+	return rep, err{{ end }}
+	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&{{ .HttpPbName }}.{{ .Reply }}{}{{ end }}, nil
 }
 
 {{- else if eq .Type 2 }}
-func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error {
+func (s *{{ .Service }}Service) {{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
 		req, err := conn.Recv()
 		if err == io.EOF {
@@ -58,7 +76,7 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 			return err
 		}
 		
-		err = conn.Send(&pb.{{ .Reply }}{})
+		err = conn.Send(&{{ .HttpPbName }}.{{ .Reply }}{})
 		if err != nil {
 			return err
 		}
@@ -66,11 +84,11 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 }
 
 {{- else if eq .Type 3 }}
-func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Server) error {
+func (s *{{ .Service }}Service) {{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
 		req, err := conn.Recv()
 		if err == io.EOF {
-			return conn.SendAndClose(&pb.{{ .Reply }}{})
+			return conn.SendAndClose(&{{ .HttpPbName }}.{{ .Reply }}{})
 		}
 		if err != nil {
 			return err
@@ -80,9 +98,9 @@ func (s *{{ .Service }}Service) {{ .Name }}(conn pb.{{ .Service }}_{{ .Name }}Se
 
 {{- else if eq .Type 4 }}
 func (s *{{ .Service }}Service) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*pb.{{ .Request }}{{ end }}, conn pb.{{ .Service }}_{{ .Name }}Server) error {
+{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}, conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error {
 	for {
-		err := conn.Send(&pb.{{ .Reply }}{})
+		err := conn.Send(&{{ .HttpPbName }}.{{ .Reply }}{})
 		if err != nil {
 			return err
 		}
@@ -109,17 +127,23 @@ type IService interface {
 
 // Service is a proto service.
 type Service struct {
-	// import pb 完整package
+	// import pb 完整package; 本服务的， HTTP proto
 	Package string
+	// grpc proto package
+	GrpcPackage string
+	// 包重命名
+	HttpPbName string
+	// 包重命名
+	GrpcPbName string
 	// 引用module/app等的包名
 	ModulePackage string
 	// 引用 domain 包
 	DomainPackage string
 	// 引用 internal 包, 可以灵活引用internal下面的包
 	InternalPackage string
-	// 服务名称 OpLog
+	// 服务名称 OpLog ; proto文件里定义的service
 	Service string
-	// 服务名称 小写, 用作包名
+	// 服务名称 小写, 用作包名； opLog; 路径里的名称
 	ServiceLower string
 	Methods      []*Method
 	GoogleEmpty  bool
@@ -134,10 +158,14 @@ type Service struct {
 
 // Method is a proto method.
 type Method struct {
-	Service string
-	Name    string
-	Request string
-	Reply   string
+	// 包重命名
+	HttpPbName string
+	// 包重命名
+	GrpcPbName string
+	Service    string
+	Name       string
+	Request    string
+	Reply      string
 
 	// type: unary or stream
 	Type MethodType

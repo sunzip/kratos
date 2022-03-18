@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/change"
@@ -31,4 +32,5 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("成功执行后， 需要更新包\n make generate")
 }
