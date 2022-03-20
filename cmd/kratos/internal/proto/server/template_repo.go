@@ -12,6 +12,7 @@ package repo
 import (
 	{{- if .UseContext }}
 	"context"
+	"time"
 	{{- end }}
 	{{- if .UseIO }}
 	"io"
@@ -21,6 +22,7 @@ import (
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
+	"{{ .InternalPackage }}/conf"
 	"{{ .InternalPackage }}/data"
 	"{{ .InternalPackage }}/domain"
 )
@@ -28,11 +30,13 @@ import (
 type {{ .Service }}Repo struct {
 	// pb.Unimplemented{{ .Service }}Server
 	data *data.Data
+	bootstrap *conf.Bootstrap
 }
 
-func New{{ .Service }}Repo(data *data.Data) domain.I{{ .Service }}Repo {
+func New{{ .Service }}Repo(data *data.Data, bootstrap *conf.Bootstrap) domain.I{{ .Service }}Repo {
 	return &{{ .Service }}Repo{
 		data: data,
+		bootstrap: bootstrap,
 	}
 }
 
@@ -41,7 +45,10 @@ func New{{ .Service }}Repo(data *data.Data) domain.I{{ .Service }}Repo {
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
 {{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Reply }}{{ end }}, error) {
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.data.{{ .Service }}Grpc().{{ .Name }}(ctx,req){{ end }}
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(s.bootstrap.MicroService.Info.Timeout))
+	defer cancel()
+
+	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.data.{{ .Service }}Grpc().{{ .Name }}(ctxTimeout,req){{ end }}
 	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}{{ end }}, nil
 }
 

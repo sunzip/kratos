@@ -13,6 +13,7 @@ import (
 	{{- if .UseContext }}
 	"context"
 	{{- end }}
+	"errors"
 	{{- if .UseIO }}
 	"io"
 	{{- end }}
@@ -26,6 +27,7 @@ import (
 	"{{ .DomainPackage }}"
 	"git.hiscene.net/hifoundry/go-kit/util/hiKratos"
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/grpc/status"
 )
 
 type {{ .Service }}Service struct {
@@ -54,7 +56,12 @@ func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .R
 	}
 	repData, err := s.repo.{{ .Name }}(ctx,reqData)
 	if err != nil {
-		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
+		statusErr := status.FromContextError(context.DeadlineExceeded)
+		if errors.Is(err, statusErr.Err()) {
+			return nil, hiKratos.ResponseErr(ctx, pb.ErrorTimeout)
+		} else {
+			return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
+		}
 	}
 	rep := &{{ .HttpPbName }}.{{ .Reply }}{}
 	err = tools.StructConvert(rep, repData)
