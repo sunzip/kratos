@@ -1,11 +1,6 @@
 package server
 
-import (
-	"bytes"
-	"html/template"
-)
-
-var appTemplate = `
+var appTemplateGrpc = `
 {{- /* delete empty line */ -}}
 package app
 
@@ -91,28 +86,3 @@ func (s *{{ .Service }}App) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Emp
 {{- end }}
 {{- end }}
 `
-
-func (s *Service) executeApp() ([]byte, error) {
-	const empty = "google.protobuf.Empty"
-	buf := new(bytes.Buffer)
-	for _, method := range s.Methods {
-		if (method.Type == unaryType && (method.Request == empty || method.Reply == empty)) ||
-			(method.Type == returnsStreamsType && method.Request == empty) {
-			s.GoogleEmpty = true
-		}
-		if method.Type == twoWayStreamsType || method.Type == requestStreamsType {
-			s.UseIO = true
-		}
-		if method.Type == unaryType {
-			s.UseContext = true
-		}
-	}
-	tmpl, err := template.New("app").Parse(appTemplate)
-	if err != nil {
-		return nil, err
-	}
-	if err := tmpl.Execute(buf, s); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}

@@ -27,8 +27,12 @@ var CmdServer = &cobra.Command{
 }
 var targetDir string
 
+// 是 http or grpc 层
+var layer string
+
 func init() {
 	CmdServer.Flags().StringVarP(&targetDir, "target-dir", "t", "internal/service", "generate target directory")
+	CmdServer.Flags().StringVarP(&layer, "layer", "l", "http", "http or grpc layer")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -36,6 +40,16 @@ func run(cmd *cobra.Command, args []string) {
 		fmt.Fprintln(os.Stderr, "Please specify the proto file. Example: kratos proto server api/xxx.proto")
 		return
 	}
+
+	if layer == "grpc" {
+		serviceTemplate = serviceTemplateGrpc
+		repoTemplate = repoTemplateGrpc
+		appTemplate = appTemplateGrpc
+		domainTemplate = domainTemplateGrpc
+
+		GrpcPbName = "pb"
+	}
+
 	reader, err := os.Open(args[0])
 	if err != nil {
 		log.Fatal(err)
@@ -81,7 +95,14 @@ func run(cmd *cobra.Command, args []string) {
 			cs.ToolName = "createService"
 			cs.HttpPbName = HttpPbName
 			cs.GrpcPbName = GrpcPbName
-			cs.GrpcPackage = changeDir(cs.Package, "/drone-appservice/", "/common/api/drone/info/v1")
+			// 找到api上一级, projectName
+			projectName := getPre(cs.Package, "api")
+			cs.ProjectName = projectName
+			cs.Layer = layer
+			cs.GrpcPackage = changeDir(cs.Package,
+				fmt.Sprintf("/%s/", projectName),
+				/*  "/drone-appservice/" */
+				"/common/api/drone/info/v1")
 			res = append(res, cs)
 		}),
 	)
@@ -94,11 +115,12 @@ func run(cmd *cobra.Command, args []string) {
 		{
 			// data.go文件增加Data类字段,Data类方法,NewData函数增加代码
 
-			// ok
-			dataPath := changeDir(targetDir, "/module/", "/data")
-			sf := parseFile(dataPath, "data.go", s)
-			incrementMethodData(dataPath, "data.go", sf, s)
-
+			if layer != "grpc" {
+				// ok
+				dataPath := changeDir(targetDir, "/module/", "/data")
+				sf := parseFile(dataPath, "data.go", s)
+				incrementMethodData(dataPath, "data.go", sf, s)
+			}
 			// ok
 			protocolPath := changeDir(targetDir, "/module/", "/protocol")
 			sfReg := parseFile(protocolPath, "register.go", s)

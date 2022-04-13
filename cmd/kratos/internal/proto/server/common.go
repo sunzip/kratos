@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"go/ast"
 	"runtime"
 	"strings"
@@ -15,6 +16,15 @@ func changeDir(dir, replaceDir, newDir string) string {
 	pos := strings.Index(dir, replaceDir)
 
 	return dir[:pos] + newDir
+}
+
+// 接收/ 路径地址,或者包名称
+func getPre(dir, find string) string {
+	// git.hiscene.net/hi_uav/uav-command-server/info/api/drone/info/v1
+	pos := strings.Index(dir, fmt.Sprintf("/%s/", find))
+	dir = dir[:pos]
+	pos = strings.LastIndex(dir, "/")
+	return dir[pos+1:]
 }
 
 func parseSourceFile() {

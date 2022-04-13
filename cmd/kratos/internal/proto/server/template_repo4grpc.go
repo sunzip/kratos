@@ -1,11 +1,6 @@
 package server
 
-import (
-	"bytes"
-	"html/template"
-)
-
-var repoTemplate = `
+var repoTemplateGrpc = `
 {{- /* delete empty line */ -}}
 package repo
 
@@ -43,12 +38,12 @@ func New{{ .Service }}Repo(data *data.Data, bootstrap *conf.Bootstrap) domain.I{
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
 {{- if eq .Type 1 }}
-func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Reply }}{{ end }}, error) {
-	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(s.bootstrap.MicroService.Info.Timeout))
+func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context{{ if eq .Request $s1 }}{{ else }}, req *{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}{{ else }}*{{ .GrpcPbName }}.{{ .Reply }},{{ end }} error) {
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(s.bootstrap.Data.Mysql.Timeout))
 	defer cancel()
 
-	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.data.{{ .Service }}Grpc().{{ .Name }}(ctxTimeout,req){{ end }}
-	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}{{ end }}, nil
+	return {{ if eq .Reply $s1 }}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}, {{ end }}nil
+	// return {{ if eq .Reply $s1 }}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{},{{ end }} nil
 }
 
 {{- else if eq .Type 2 }}
@@ -96,28 +91,3 @@ func (s *{{ .Service }}Repo) {{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Em
 {{- end }}
 {{- end }}
 `
-
-func (s *Service) executeRepo() ([]byte, error) {
-	const empty = "google.protobuf.Empty"
-	buf := new(bytes.Buffer)
-	for _, method := range s.Methods {
-		if (method.Type == unaryType && (method.Request == empty || method.Reply == empty)) ||
-			(method.Type == returnsStreamsType && method.Request == empty) {
-			s.GoogleEmpty = true
-		}
-		if method.Type == twoWayStreamsType || method.Type == requestStreamsType {
-			s.UseIO = true
-		}
-		if method.Type == unaryType {
-			s.UseContext = true
-		}
-	}
-	tmpl, err := template.New("repo").Parse(repoTemplate)
-	if err != nil {
-		return nil, err
-	}
-	if err := tmpl.Execute(buf, s); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}

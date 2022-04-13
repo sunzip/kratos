@@ -46,8 +46,7 @@ func New{{ .Service }}Service(logger log.Logger, repo domain.I{{ .Service }}Repo
 {{- $s1 := "google.protobuf.Empty" }}
 {{ range .Methods }}
 {{- if eq .Type 1 }}
-func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) {
+func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) {
 	{{ if eq .Reply $s1 }}return &emptypb.Empty{}{{ else }}
 	reqData := &{{ .GrpcPbName }}.{{ .Request }}{}
 	err := tools.StructConvert(reqData, req)
@@ -142,6 +141,10 @@ type Service struct {
 	HttpPbName string
 	// 包重命名
 	GrpcPbName string
+	// 项目名称, xx/info/api/xx, 这里就是info
+	ProjectName string
+	// 生成哪一层的代码, http grpc
+	Layer string
 	// 引用module/app等的包名
 	ModulePackage string
 	// 引用 domain 包
