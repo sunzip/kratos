@@ -16,7 +16,7 @@ import (
 	{{- if .UseIO }}
 	"io"
 	{{- end }}
-	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
+	// {{ .GrpcPbName }} "{{ .GrpcPackage }}"
 	{{ .HttpPbName }} "{{ .Package }}"
 )
 

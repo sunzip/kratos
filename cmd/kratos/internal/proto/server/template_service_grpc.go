@@ -13,7 +13,7 @@ import (
 	"io"
 	{{- end }}
 
-	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
+	// {{ .GrpcPbName }} "{{ .GrpcPackage }}"
 	"git.hiscene.net/hi_uav/uav-command-server/common/tools"
 	{{ .HttpPbName }} "{{ .Package }}"
 	{{- if .GoogleEmpty }}

@@ -13,7 +13,7 @@ import (
 	"io"
 	{{- end }}
 
-	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
+	{{ .GrpcPbName }} "{{ .Package }}"
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}

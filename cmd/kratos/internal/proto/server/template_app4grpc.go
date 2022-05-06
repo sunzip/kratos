@@ -22,12 +22,12 @@ import (
 )
 
 type {{ .Service }}App struct {
-	// pb.Unimplemented{{ .Service }}Server
+	pb.Unimplemented{{ .Service }}Server
 	logger *log.Helper
 	service    domain.I{{ .Service }}Service
 }
 
-func New{{ .Service }}App(logger log.Logger, service domain.I{{ .Service }}Service) pb.{{ .Service }}HTTPServer {
+func New{{ .Service }}App(logger log.Logger, service domain.I{{ .Service }}Service) pb.{{ .Service }}Server {
 	return &{{ .Service }}App{
 		logger:  log.NewHelper(logger),
 		service:    service,
