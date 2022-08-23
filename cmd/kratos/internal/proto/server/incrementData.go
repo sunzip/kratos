@@ -204,15 +204,30 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 			} else {
 				if ret.Name.Name == "RegisterHTTP" {
 					if len(ret.Body.List) > 0 {
-						pbPkgName := "pbInfo"
+						pbPkgName := importAlias
 
 						registerService := fmt.Sprintf(`%s.Register%[2]sHTTPServer(srv, s.%[2]s)`,
 							pbPkgName, s.Service)
+
 						for _, item := range ret.Body.List {
 							registerLine := bytes.Buffer{}
 							printer.Fprint(&registerLine, fset, item)
 							if registerService == registerLine.String() {
 								sourceFile.LineExist[lineAssignRegister] = true
+							}
+						}
+					}
+				} else if ret.Name.Name == "RegisterRPC" {
+					if len(ret.Body.List) > 0 {
+						pbPkgName := importAlias
+
+						registerService := fmt.Sprintf(`%s.Register%[2]sServer(srv, s.%[2]s)`,
+							pbPkgName, s.Service)
+						for _, item := range ret.Body.List {
+							registerLine := bytes.Buffer{}
+							printer.Fprint(&registerLine, fset, item)
+							if registerService == registerLine.String() {
+								sourceFile.LineExist[lineAssignRegisterGrpc] = true
 							}
 						}
 					}

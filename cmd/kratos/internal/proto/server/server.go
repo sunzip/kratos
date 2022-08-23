@@ -30,9 +30,17 @@ var targetDir string
 // 是 http or grpc 层
 var layer string
 
+// proto 所属服务
+var service string
+
+// 服务引入别名
+var importAlias string
+
 func init() {
 	CmdServer.Flags().StringVarP(&targetDir, "target-dir", "t", "internal/service", "generate target directory")
 	CmdServer.Flags().StringVarP(&layer, "layer", "l", "http", "http or grpc layer")
+	CmdServer.Flags().StringVarP(&service, "service", "s", "/mozi-common/api/mozi/device/v1", "http时启用.proto所属服务,如/mozi-common/api/mozi/device/v1")
+	CmdServer.Flags().StringVarP(&importAlias, "alias", "a", "phInfo", "http时启用.对应的服务的别名, 如pbInfo")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -48,6 +56,8 @@ func run(cmd *cobra.Command, args []string) {
 		domainTemplate = domainTemplateGrpc
 
 		GrpcPbName = "pb"
+
+		importAlias = "pb"
 	}
 
 	reader, err := os.Open(args[0])
@@ -99,10 +109,16 @@ func run(cmd *cobra.Command, args []string) {
 			projectName := getPre(cs.Package, "api")
 			cs.ProjectName = projectName
 			cs.Layer = layer
-			cs.GrpcPackage = changeDir(cs.Package,
-				fmt.Sprintf("/%s/", projectName),
-				/*  "/drone-appservice/" */
-				"/common/api/drone/info/v1")
+			if strings.ToLower(layer) == "http" {
+				// http 替换为common里的服务. 在api前面项目替换为common项目
+				//  如 git.hiscene.net/hiar_mozi/server/mozi-device-service/api/mozi/device/v1 -> git.hiscene.net/hiar_mozi/server/mozi-common/api/mozi/device/v1
+				cs.GrpcPackage = changeDir(cs.Package,
+					fmt.Sprintf("/%s/", projectName),
+					/*  "/drone-appservice/" */
+					service)
+			} else {
+				cs.GrpcPackage = cs.Package
+			}
 			res = append(res, cs)
 		}),
 	)
@@ -124,7 +140,8 @@ func run(cmd *cobra.Command, args []string) {
 			// ok
 			protocolPath := changeDir(targetDir, "/module/", "/protocol")
 			sfReg := parseFile(protocolPath, "register.go", s)
-			incrementRegister(protocolPath, "register.go", sfReg, s)
+
+			incrementRegister(importAlias, protocolPath, "register.go", sfReg, s)
 
 			cmdServerPath := changeDir(targetDir, "/internal/", "/cmd/server")
 			sfCmdServer := parseFile(cmdServerPath, "wire.go", s)

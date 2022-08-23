@@ -19,9 +19,6 @@ import (
 	{{- end }}
 
 	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
-	{{- if .GoogleEmpty }}
-	"google.golang.org/protobuf/types/known/emptypb"
-	{{- end }}
 	"{{ .InternalPackage }}/conf"
 	"{{ .InternalPackage }}/data"
 	"{{ .InternalPackage }}/domain"
@@ -46,7 +43,8 @@ func New{{ .Service }}Repo(data *data.Data, bootstrap *conf.Bootstrap) domain.I{
 func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .GrpcPbName }}.{{ .Reply }}{{ end }}, error) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(s.bootstrap.MicroService.Info.Timeout))
 	defer cancel()
-
+	// 请移除下行代码, 换成实际使用, 否则删除上面的语句
+	ctxTimeout=ctxTimeout 
 	return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}s.data.{{ .Service }}Grpc().{{ .Name }}(ctxTimeout,req){{ end }}
 	// return {{ if eq .Reply $s1 }}&emptypb.Empty{}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}{{ end }}, nil
 }

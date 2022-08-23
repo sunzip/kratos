@@ -30,6 +30,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+var(
+	module="{{ .Service }}.service"
+)
+
 type {{ .Service }}Service struct {
 	// pb.Unimplemented{{ .Service }}Server
 	logger *log.Helper
@@ -47,24 +51,29 @@ func New{{ .Service }}Service(logger log.Logger, repo domain.I{{ .Service }}Repo
 {{ range .Methods }}
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) {
+	method:="{{ .Name }}"
 	{{ if eq .Reply $s1 }}return &emptypb.Empty{}{{ else }}
 	reqData := &{{ .GrpcPbName }}.{{ .Request }}{}
 	err := tools.StructConvert(reqData, req)
 	if err != nil {
+		s.logger.WithContext(ctx).Errorw("module",module,"method",method,"StructConvert err",err)
 		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInvalidParameter)
 	}
 	repData, err := s.repo.{{ .Name }}(ctx,reqData)
 	if err != nil {
 		statusErr := status.FromContextError(context.DeadlineExceeded)
 		if errors.Is(err, statusErr.Err()) {
+			s.logger.WithContext(ctx).Errorw("module",module,"method",method,"repo.{{ .Name }} timeout",err)
 			return nil, hiKratos.ResponseErr(ctx, pb.ErrorTimeout)
 		} else {
+			s.logger.WithContext(ctx).Errorw("module",module,"method",method,"repo.{{ .Name }} InternalError",err)
 			return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
 		}
 	}
 	rep := &{{ .HttpPbName }}.{{ .Reply }}{}
 	err = tools.StructConvert(rep, repData)
 	if err != nil {
+		s.logger.WithContext(ctx).Errorw("module",module,"method",method,"StructConvert err",err)
 		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
 	}
 	return rep, err{{ end }}

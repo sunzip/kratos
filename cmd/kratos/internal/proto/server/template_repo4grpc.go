@@ -14,9 +14,6 @@ import (
 	{{- end }}
 
 	{{ .GrpcPbName }} "{{ .Package }}"
-	{{- if .GoogleEmpty }}
-	"google.golang.org/protobuf/types/known/emptypb"
-	{{- end }}
 	"{{ .InternalPackage }}/conf"
 	"{{ .InternalPackage }}/data"
 	"{{ .InternalPackage }}/domain"
@@ -41,8 +38,10 @@ func New{{ .Service }}Repo(data *data.Data, bootstrap *conf.Bootstrap) domain.I{
 func (s *{{ .Service }}Repo) {{ .Name }}(ctx context.Context{{ if eq .Request $s1 }}{{ else }}, req *{{ .GrpcPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}{{ else }}*{{ .GrpcPbName }}.{{ .Reply }},{{ end }} error) {
 	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(s.bootstrap.Data.Mysql.Timeout))
 	defer cancel()
-
-	return {{ if eq .Reply $s1 }}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{}, {{ end }}nil
+	{{ if eq .Reply $s1 }}{{ else }}rep := &{{ .GrpcPbName }}.{{ .Reply }}{}{{ end }}
+	// 请移除下行代码, 换成实际使用, 否则删除上面的语句
+	ctxTimeout=ctxTimeout 
+	return {{ if eq .Reply $s1 }}{{ else }}rep, {{ end }}nil
 	// return {{ if eq .Reply $s1 }}{{ else }}&{{ .GrpcPbName }}.{{ .Reply }}{},{{ end }} nil
 }
 

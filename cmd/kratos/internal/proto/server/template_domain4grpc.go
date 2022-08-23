@@ -13,11 +13,15 @@ import (
 	{{- if .UseContext }}
 	"context"
 	{{- end }}
+	{{- if .GoogleEmpty }}
+	"google.golang.org/protobuf/types/known/emptypb"
+	{{- end }}
 	{{- if .UseIO }}
 	"io"
 	{{- end }}
 	// {{ .GrpcPbName }} "{{ .GrpcPackage }}"
 	{{ .HttpPbName }} "{{ .Package }}"
+
 )
 
 // 参数和类型可改
