@@ -299,7 +299,8 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 		case *ast.ImportSpec:
 			{
 				// fmt.Println(ret)
-				want := fmt.Sprintf("\"git.hiscene.net/hi_uav/uav-command-server/%s/internal/module/%s\"", s.ProjectName, s.ServiceLower)
+				moduleService := changeDir(s.Package, "/api/", fmt.Sprintf("/internal/module/%s", s.ServiceLower))
+				want := fmt.Sprintf(`"%s"`, moduleService)
 				if ret.Path.Value == want {
 					sourceFile.LineExist[wireImport] = true
 				}

@@ -14,9 +14,10 @@ import (
 	internal/prottocol/register.go
 */
 var (
-	lineAssignRegister             = "*PbServer-RegisterHTTP"
-	lineAssignRegisterGrpc         = "*PbServer-RegisterRPC"
-	clientAssign                   = "clientAssign"
+	lineAssignRegister     = "*PbServer-RegisterHTTP"
+	lineAssignRegisterGrpc = "*PbServer-RegisterRPC"
+	clientAssign           = "clientAssign"
+	// 当前服务的module, 例 "git.hiscene.net/hiar_mozi/server/mozi-device-service/internal/module/device_org"
 	wireImport                     = "module-service"
 	wireAutoWireAppPanicBuildParam = "wireAutoWireAppPanicBuildParam"
 )

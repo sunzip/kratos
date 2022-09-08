@@ -25,7 +25,9 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
 	"{{ .DomainPackage }}"
+	mozitools "git.hiscene.net/hiar_mozi/server/mozi-common/tools"
 	"git.hiscene.net/hifoundry/go-kit/util/hiKratos"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/status"
 )
@@ -62,9 +64,15 @@ func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .R
 	repData, err := s.repo.{{ .Name }}(ctx,reqData)
 	if err != nil {
 		statusErr := status.FromContextError(context.DeadlineExceeded)
-		if errors.Is(err, statusErr.Err()) {
+		if errors.Is(err, statusErr.Err()) || errors.Is(err, context.DeadlineExceeded) {
 			s.logger.WithContext(ctx).Errorw("module",module,"method",method,"repo.{{ .Name }} timeout",err)
 			return nil, hiKratos.ResponseErr(ctx, pb.ErrorTimeout)
+		} else if cErr, ok := err.(mozitools.CustomeErr); ok {
+			s.logger.WithContext(ctx).Errorw("module", module, "method", method, "repo.{{ .Name }} CustomeErr", err)
+			return nil, hiKratos.ResponseErr(ctx, cErr.Error4Kratos)
+		} else if _, ok := err.(*kerrors.Error); ok {
+			s.logger.WithContext(ctx).Errorw("module", module, "method", method, "repo.{{ .Name }} kratos err", err)
+			return nil, err
 		} else {
 			s.logger.WithContext(ctx).Errorw("module",module,"method",method,"repo.{{ .Name }} InternalError",err)
 			return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)
@@ -159,6 +167,7 @@ type Service struct {
 	// 引用 domain 包
 	DomainPackage string
 	// 引用 internal 包, 可以灵活引用internal下面的包
+	//  如 git.hiscene.net/hiar_mozi/server/mozi-geo-service/internal/
 	InternalPackage string
 	// 服务名称 OpLog ; proto文件里定义的service
 	Service string
