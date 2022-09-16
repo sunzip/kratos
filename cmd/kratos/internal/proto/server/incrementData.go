@@ -297,12 +297,22 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 				sourceFile.Structs[ret.Name.Name] = si
 			}
 		case *ast.ImportSpec:
+			// 注意, ret.Path.Value不包括别名
 			{
 				// fmt.Println(ret)
 				moduleService := changeDir(s.Package, "/api/", fmt.Sprintf("/internal/module/%s", s.ServiceLower))
 				want := fmt.Sprintf(`"%s"`, moduleService)
 				if ret.Path.Value == want {
 					sourceFile.LineExist[wireImport] = true
+				}
+				sourceFile.Imports.StartPos = int(ret.Pos())
+				sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
+			}
+			{
+				// register import
+				want := fmt.Sprintf(`"%s"`, s.Package)
+				if ret.Path.Value == want {
+					sourceFile.LineExist[registerPbImport] = true
 				}
 				sourceFile.Imports.StartPos = int(ret.Pos())
 				sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
