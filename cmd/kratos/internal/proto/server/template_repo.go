@@ -18,6 +18,10 @@ import (
 	"io"
 	{{- end }}
 
+	{{- if .GoogleEmpty }}
+	"google.golang.org/protobuf/types/known/emptypb"
+	{{- end }}
+	
 	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
 	"{{ .InternalPackage }}/conf"
 	"{{ .InternalPackage }}/data"

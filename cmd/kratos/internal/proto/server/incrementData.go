@@ -315,6 +315,9 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 			}
 		case *ast.ImportSpec:
 			// 注意, ret.Path.Value不包括别名
+			// 1. Name=别名
+			// 2. doc 是包上方的文档注释
+			// 3. comment 是包后面, 行内的注释
 			{
 				// wire import
 				// fmt.Println(ret)
@@ -324,7 +327,14 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 					sourceFile.LineExist[wireImport] = true
 				}
 				sourceFile.Imports.StartPos = int(ret.Pos())
-				sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
+				if ret.Comment != nil {
+					if ret.Comment.End().IsValid() {
+						sourceFile.Imports.EndPos = int(ret.Comment.End())
+					}
+				} else {
+					sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
+				}
+				sourceFile.Imports.Text = ret.Path.Value
 			}
 			{
 				// register import/data import
@@ -333,7 +343,14 @@ func parseFile(fileDir string, fileName string, s *Service) *SourceFile {
 					sourceFile.LineExist[registerPbImport] = true
 				}
 				sourceFile.Imports.StartPos = int(ret.Pos())
-				sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
+				if ret.Comment != nil {
+					if ret.Comment.End().IsValid() {
+						sourceFile.Imports.EndPos = int(ret.Comment.End())
+					}
+				} else {
+					sourceFile.Imports.EndPos = int(ret.Path.Pos()) + len(ret.Path.Value)
+				}
+				sourceFile.Imports.Text = ret.Path.Value
 			}
 		}
 
