@@ -14,7 +14,7 @@ import (
 var (
 	// pb的别名
 	HttpPbName = "pb"
-	// pb的别名
+	// 引用的pb的别名
 	GrpcPbName = "infoPb"
 )
 
@@ -58,6 +58,8 @@ func run(cmd *cobra.Command, args []string) {
 		GrpcPbName = "pb"
 
 		importAlias = "pb"
+	} else {
+		GrpcPbName = importAlias
 	}
 
 	reader, err := os.Open(args[0])
@@ -135,7 +137,7 @@ func run(cmd *cobra.Command, args []string) {
 				// ok
 				dataPath := changeDir(targetDir, "/module/", "/data")
 				sf := parseFile(dataPath, "data.go", s)
-				incrementMethodData(dataPath, "data.go", sf, s)
+				incrementMethodData(dataPath, "data.go", sf, s, importAlias)
 			}
 			// ok
 			protocolPath := changeDir(targetDir, "/module/", "/protocol")
