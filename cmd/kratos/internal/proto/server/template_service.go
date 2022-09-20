@@ -19,7 +19,6 @@ import (
 	{{- end }}
 
 	{{ .GrpcPbName }} "{{ .GrpcPackage }}"
-	"git.hiscene.net/hi_uav/uav-command-server/common/tools"
 	{{ .HttpPbName }} "{{ .Package }}"
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -53,10 +52,10 @@ func New{{ .Service }}Service(logger log.Logger, repo domain.I{{ .Service }}Repo
 {{ range .Methods }}
 {{- if eq .Type 1 }}
 func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) {
+	{{ if eq .Reply $s1 }}return &emptypb.Empty{}, nil{{ else }}
 	method:="{{ .Name }}"
-	{{ if eq .Reply $s1 }}return &emptypb.Empty{}{{ else }}
 	reqData := &{{ .GrpcPbName }}.{{ .Request }}{}
-	err := tools.StructConvert(reqData, req)
+	err := mozitools.StructConvert(reqData, req)
 	if err != nil {
 		s.logger.WithContext(ctx).Errorw("module",module,"method",method,"StructConvert err",err)
 		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInvalidParameter)
@@ -79,7 +78,7 @@ func (s *{{ .Service }}Service) {{ .Name }}(ctx context.Context, req {{ if eq .R
 		}
 	}
 	rep := &{{ .HttpPbName }}.{{ .Reply }}{}
-	err = tools.StructConvert(rep, repData)
+	err = mozitools.StructConvert(rep, repData)
 	if err != nil {
 		s.logger.WithContext(ctx).Errorw("module",module,"method",method,"StructConvert err",err)
 		return nil, hiKratos.ResponseErr(ctx, {{ .HttpPbName }}.ErrorInternalError)

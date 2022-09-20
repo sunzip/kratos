@@ -16,11 +16,13 @@ import (
 var (
 	lineAssignRegister     = "*PbServer-RegisterHTTP"
 	lineAssignRegisterGrpc = "*PbServer-RegisterRPC"
-	clientAssign           = "clientAssign"
+	// 不能变动, 同label
+	clientAssignKey = "clientAssign"
 	// 当前服务的module, 例 "git.hiscene.net/hiar_mozi/server/mozi-device-service/internal/module/device_org"
 	wireImport                     = "module-service"
 	wireAutoWireAppPanicBuildParam = "wireAutoWireAppPanicBuildParam"
 	registerPbImport               = "pb-import"
+	dataPbImport                   = "data-pb-import"
 )
 
 // 增加方法
