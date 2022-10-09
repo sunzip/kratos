@@ -52,8 +52,7 @@ type I{{ .Service }}Service interface {
 	{{- /* delete empty line */ -}}
 	{{ range .Methods }}
 	{{- if eq .Type 1 }}
-	{{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) 
+	{{ .Name }}(ctx context.Context, req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}) ({{ if eq .Reply $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Reply }}{{ end }}, error) 
 
 	{{- else if eq .Type 2 }}
 	{{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error 
@@ -62,8 +61,7 @@ type I{{ .Service }}Service interface {
 	{{ .Name }}(conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- else if eq .Type 4 }}
-	{{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty
-	{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}, conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error
+	{{ .Name }}(req {{ if eq .Request $s1 }}*emptypb.Empty{{ else }}*{{ .HttpPbName }}.{{ .Request }}{{ end }}, conn {{ .HttpPbName }}.{{ .Service }}_{{ .Name }}Server) error
 
 	{{- end }}
 	{{- end }}
