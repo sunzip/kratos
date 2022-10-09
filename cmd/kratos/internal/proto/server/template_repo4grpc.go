@@ -20,7 +20,7 @@ import (
 	commonPb "git.hiscene.net/hiar_mozi/server/mozi-common/api/mozi/common/v1"  {{- if eq 2 1 }} 注释,此行不需要跟随项目变动, common里的pb定义,包括err {{ end }}
 	conf "git.hiscene.net/hiar_mozi/server/mozi-common/model/internal_conf"  {{- if eq 2 1 }} 注释,此行不需要跟随项目变动, common里的pb定义,包括err {{ end }}
 	{{ .GrpcPbName }} "{{ .Package }}" {{- if eq 2 1 }} 注释, pb {{ end }}
-	"{{ .InternalPackage }}/conf"
+	// "{{ .InternalPackage }}/conf"
 	"{{ .InternalPackage }}/data"
 	"{{ .InternalPackage }}/domain"
 	mozitools "git.hiscene.net/hiar_mozi/server/mozi-common/tools" {{- if eq 2 1 }} 注释,此行不需要跟随项目变动 {{ end }}
