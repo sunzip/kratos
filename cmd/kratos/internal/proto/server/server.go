@@ -44,6 +44,10 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	defer func() {
+		fmt.Println("成功执行后， 需要更新包\n make generate")
+	}()
+
 	if len(args) == 0 {
 		fmt.Fprintln(os.Stderr, "Please specify the proto file. Example: kratos proto server api/xxx.proto")
 		return

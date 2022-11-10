@@ -1,9 +1,9 @@
 package proto
 
 import (
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/proto/add"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/proto/client"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/proto/server"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/proto/add"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/proto/client"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/proto/server"
 
 	"github.com/spf13/cobra"
 )

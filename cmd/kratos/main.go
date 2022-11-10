@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/change"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/project"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/proto"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/run"
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/upgrade"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/change"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/project"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/proto"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/run"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/upgrade"
 
 	"github.com/spf13/cobra"
 )
@@ -32,5 +31,4 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("成功执行后， 需要更新包\n make generate")
 }

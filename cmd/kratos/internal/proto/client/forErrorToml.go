@@ -14,10 +14,12 @@ import (
 // 为错误码枚举的翻译做解析
 // 在当前路径下 dir/i18n/example.{zh}.toml
 func do4ErrorToml(protoFile string) {
+	// protoFile = "./" + protoFile
 	if !strings.HasSuffix(protoFile, "errors.proto") {
 		return
 	}
 	dir := filepath.Dir(protoFile)
+	// fmt.Println(protoFile, dir)
 	reader, err := os.Open(protoFile)
 	if err != nil {
 		log.Fatal(err)
@@ -41,7 +43,7 @@ func do4ErrorToml(protoFile string) {
 			for _, item := range o.Elements {
 				if enumField, ok := item.(*proto.EnumField); ok {
 					var langName string
-					fmt.Println(enumField)
+					// fmt.Println(enumField)
 					if enumField.Comment != nil {
 						l := len(enumField.Comment.Lines)
 						if l > 0 {

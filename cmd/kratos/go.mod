@@ -1,4 +1,4 @@
-module github.com/sunzip/kratos/cmd/kratos/v2
+module github.com/sunzip/kratos/cmd/mykratos/v2
 
 go 1.16
 

@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sunzip/kratos/cmd/kratos/v2/internal/base"
+	"github.com/sunzip/kratos/cmd/mykratos/v2/internal/base"
 
 	"github.com/spf13/cobra"
 )
@@ -31,6 +31,10 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	defer func() {
+		fmt.Println("成功执行后， 需要同步example.{lang}.toml 文件到各个服务")
+	}()
+
 	if len(args) == 0 {
 		fmt.Println("Please enter the proto file or directory")
 		return

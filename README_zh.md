@@ -60,7 +60,7 @@ Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及
 ### Installing
 ##### go install 安装：
 ```
-go install github.com/sunzip/kratos/cmd/kratos/v2@latest
+go install github.com/sunzip/kratos/cmd/mykratos/v2@latest
 kratos upgrade
 ```
 ##### 源码编译安装：
