@@ -82,6 +82,7 @@ func walk(dir string, args []string) error {
 
 // generate is used to execute the generate command for the specified proto file
 func generate(proto string, args []string) error {
+	do4ErrorToml(proto)
 	input := []string{
 		"--proto_path=.",
 	}
