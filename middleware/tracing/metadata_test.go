@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/sunzip/kratos/v2"
+	"github.com/sunzip/kratos/v2/metadata"
 
 	"go.opentelemetry.io/otel/propagation"
 )
@@ -27,9 +27,9 @@ func TestMetadata_Inject(t *testing.T) {
 			want: "https://go-kratos.dev",
 		},
 		{
-			name: "https://github.com/go-kratos/kratos",
-			args: args{"https://github.com/go-kratos/kratos", propagation.HeaderCarrier{"mode": []string{"test"}}},
-			want: "https://github.com/go-kratos/kratos",
+			name: "https://github.com/sunzip/kratos",
+			args: args{"https://github.com/sunzip/kratos", propagation.HeaderCarrier{"mode": []string{"test"}}},
+			want: "https://github.com/sunzip/kratos",
 		},
 	}
 	for _, tt := range tests {
@@ -64,12 +64,12 @@ func TestMetadata_Extract(t *testing.T) {
 			want: "https://go-kratos.dev",
 		},
 		{
-			name: "https://github.com/go-kratos/kratos",
+			name: "https://github.com/sunzip/kratos",
 			args: args{
 				parent:  metadata.NewServerContext(context.Background(), metadata.Metadata{}),
-				carrier: propagation.HeaderCarrier{"X-Md-Service-Name": []string{"https://github.com/go-kratos/kratos"}},
+				carrier: propagation.HeaderCarrier{"X-Md-Service-Name": []string{"https://github.com/sunzip/kratos"}},
 			},
-			want: "https://github.com/go-kratos/kratos",
+			want: "https://github.com/sunzip/kratos",
 		},
 	}
 	for _, tt := range tests {

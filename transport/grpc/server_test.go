@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	pb "github.com/go-kratos/kratos/v2/internal/testdata/helloworld"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/middleware"
-	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/sunzip/kratos/v2/errors"
+	pb "github.com/sunzip/kratos/v2/internal/testdata/helloworld"
+	"github.com/sunzip/kratos/v2/log"
+	"github.com/sunzip/kratos/v2/middleware"
+	"github.com/sunzip/kratos/v2/transport"
 
 	"google.golang.org/grpc"
 )

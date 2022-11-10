@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
+	"github.com/sunzip/kratos/v2/registry"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 

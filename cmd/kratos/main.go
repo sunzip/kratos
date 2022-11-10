@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/change"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/project"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/proto"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/run"
-	"github.com/go-kratos/kratos/cmd/kratos/v2/internal/upgrade"
+	"github.com/sunzip/kratos/cmd/kratos/v2/internal/change"
+	"github.com/sunzip/kratos/cmd/kratos/v2/internal/project"
+	"github.com/sunzip/kratos/cmd/kratos/v2/internal/proto"
+	"github.com/sunzip/kratos/cmd/kratos/v2/internal/run"
+	"github.com/sunzip/kratos/cmd/kratos/v2/internal/upgrade"
 
 	"github.com/spf13/cobra"
 )

@@ -3,7 +3,7 @@ package datadog
 import (
 	"time"
 
-	"github.com/go-kratos/kratos/v2/metrics"
+	"github.com/sunzip/kratos/v2/metrics"
 )
 
 var _ metrics.Observer = (*timing)(nil)

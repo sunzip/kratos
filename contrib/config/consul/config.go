@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
+	"github.com/sunzip/kratos/v2/config"
 )
 
 // Option is etcd config option.

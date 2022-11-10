@@ -3,8 +3,8 @@ package validate
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/middleware"
+	"github.com/sunzip/kratos/v2/errors"
+	"github.com/sunzip/kratos/v2/middleware"
 )
 
 type validator interface {

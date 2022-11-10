@@ -28,7 +28,7 @@ var (
 
 func init() {
 	if repoURL = os.Getenv("KRATOS_LAYOUT_REPO"); repoURL == "" {
-		repoURL = "https://github.com/go-kratos/kratos-layout.git"
+		repoURL = "https://github.com/sunzip/kratos-layout.git"
 	}
 	timeout = "60s"
 	CmdNew.Flags().StringVarP(&repoURL, "repo-url", "r", repoURL, "layout repo")

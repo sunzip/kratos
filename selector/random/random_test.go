@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/go-kratos/kratos/v2/registry"
-	"github.com/go-kratos/kratos/v2/selector"
-	"github.com/go-kratos/kratos/v2/selector/filter"
+	"github.com/sunzip/kratos/v2/registry"
+	"github.com/sunzip/kratos/v2/selector"
+	"github.com/sunzip/kratos/v2/selector/filter"
 )
 
 func TestWrr(t *testing.T) {

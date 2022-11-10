@@ -53,9 +53,9 @@ func TestNewEndpoint(t *testing.T) {
 		want *url.URL
 	}{
 		{
-			name: "https://github.com/go-kratos/kratos/",
-			args: args{"https", "github.com/go-kratos/kratos/", false},
-			want: &url.URL{Scheme: "https", Host: "github.com/go-kratos/kratos/"},
+			name: "https://github.com/sunzip/kratos/",
+			args: args{"https", "github.com/sunzip/kratos/", false},
+			want: &url.URL{Scheme: "https", Host: "github.com/sunzip/kratos/"},
 		},
 		{
 			name: "https://go-kratos.dev/",
@@ -86,7 +86,7 @@ func TestParseEndpoint(t *testing.T) {
 	}{
 		{
 			name:    "kratos",
-			args:    args{endpoints: []string{"https://github.com/go-kratos/kratos?isSecure=true"}, scheme: "https", isSecure: true},
+			args:    args{endpoints: []string{"https://github.com/sunzip/kratos?isSecure=true"}, scheme: "https", isSecure: true},
 			want:    "github.com",
 			wantErr: false,
 		},

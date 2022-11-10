@@ -1,9 +1,9 @@
 package consul
 
 import (
-	"github.com/go-kratos/kratos/v2/config"
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
+	"github.com/sunzip/kratos/v2/config"
 )
 
 type watcher struct {

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/v2/registry"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/sunzip/kratos/v2/registry"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
