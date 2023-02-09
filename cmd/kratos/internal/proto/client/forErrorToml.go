@@ -54,7 +54,7 @@ func do4ErrorToml(protoFile string) {
 					if len(langName) == 0 {
 						log.Fatalf("错误码%s没有翻译", enumField.Name)
 					}
-					buf.WriteString(fmt.Sprintf("%-40s = \"%s\"\n", enumField.Name, langName))
+					buf.WriteString(fmt.Sprintf("%-40s = \"%s\"\n", enumField.Name, strings.TrimSpace(langName)))
 				}
 
 			}

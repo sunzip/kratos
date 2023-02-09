@@ -1,3 +1,4 @@
+# 一. 生成错误码翻译
 切到分支 
 1. gti eheckout createServiceByTemplate
 2. go install .
@@ -14,3 +15,6 @@
 > D:\gopath\src\github.com\go-kratos\kratos: warning: directory does not exist.  
 > D:\gopath\src\github.com\go-kratos\kratos\third_party: warning: directory does not exist.
 > 不要担心
+
+# 二. 生成kratos开发框架模板
+...
