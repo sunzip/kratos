@@ -16,7 +16,7 @@ import (
 	{{- if .GoogleEmpty }}
 	"google.golang.org/protobuf/types/known/emptypb"
 	{{- end }}
-	"github.com/sunzip/kratos/v2/log"
+	"github.com/go-kratos/kratos/v2/log"
 	// "{{ .ModulePackage }}/{{ .ServiceLower }}/service"
 	"{{ .InternalPackage }}/domain"
 )

@@ -25,8 +25,8 @@ import (
 	mozitools "git.hiscene.net/hiar_mozi/server/mozi-common/tools"
 	// "git.hiscene.net/hiar_mozi/server/mozi-device-service/internal/pkg/util"//这里可以提到common里
 	"git.hiscene.net/hifoundry/go-kit/util/hiKratos"
-	kerrors "github.com/sunzip/kratos/v2/errors"
-	"github.com/sunzip/kratos/v2/log"
+	kerrors "github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc/status"
 )
 
